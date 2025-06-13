@@ -1,6 +1,7 @@
 import tkinter as tk
 from openpyxl import Workbook,load_workbook
 import os
+from datetime import datetime 
 
 measurement_entries=[]
 
@@ -24,17 +25,20 @@ def save_to_excel():
     uid = ID.get()
     mac = MAC.get()
     measurements = [entry.get() for entry in measurement_entries]
+    now = datetime.now()
+    date_str = now.strftime("%Y-%m-%d")
+    time_str = now.strftime("%H:%M:%S")
     file_path = "data.xlsx"
     if os.path.exists(file_path):
         wb = load_workbook(file_path)
         ws = wb.active
         if ws.max_row == 1 and ws.max_column == 1 and ws["A1"].value is None:
-            ws.append([ "Unique ID", "MAC"] + [f"Measurement {i+1}" for i in range(len(measurements))])
+            ws.append(["Date", "Time", "Unique ID", "MAC"] + [f"Measurement {i+1}" for i in range(len(measurements))])
     else:
         wb = Workbook()
         ws = wb.active
-        ws.append(["Unique ID", "MAC"] + [f"Measurement {i+1}" for i in range(len(measurements))])
-    ws.append([uid, mac] + measurements)
+        ws.append(["Date", "Time", "Unique ID", "MAC"] + [f"Measurement {i+1}" for i in range(len(measurements))])
+    ws.append([date_str, time_str, uid, mac] + measurements)
     wb.save(file_path)
     tk.Label(frame1, text="Saved to Excel ✅", fg="green").pack()
     
@@ -54,5 +58,6 @@ number.pack()
 tk.Button(root, text="Add Fields", command=add_fields).pack()
 frame1=tk.Frame(root)
 frame1.pack()
+tk.Button(root, text="Save to Excel", command=save_to_excel).pack()
 tk.Button(root, text="Next entry", command=clear).pack()
 root.mainloop()
