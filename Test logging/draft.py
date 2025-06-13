@@ -28,7 +28,7 @@ def save_to_excel():
     now = datetime.now()
     date_str = now.strftime("%Y-%m-%d")
     time_str = now.strftime("%H:%M:%S")
-    file_path = "data.xlsx"
+    file_path = "Test logging/data.xlsx"
     if os.path.exists(file_path):
         wb = load_workbook(file_path)
         ws = wb.active
