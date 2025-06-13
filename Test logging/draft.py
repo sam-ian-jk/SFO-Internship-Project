@@ -10,6 +10,11 @@ def add_fields():
             measurement_entries.append(entry)
     except ValueError:
         print("Please enter a valid number")
+def clear():
+    for widget in ts.winfo_children():
+        widget.destroy()
+    measurement_entries.clear()
+    
 root = tk.Tk()
 root.title("Test Logging")
 root.geometry("640x320")
@@ -24,4 +29,7 @@ tk.Label(root, text="Enter number of measurements").pack()
 number = tk.Entry(root)
 number.pack()
 tk.Button(root, text="Add Fields", command=add_fields).pack()
+ts=tk.Frame(root)
+ts.pack()
+tk.Button(root, text="Next entry", command=clear).pack()
 root.mainloop()
