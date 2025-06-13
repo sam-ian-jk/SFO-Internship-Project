@@ -1,19 +1,42 @@
 import tkinter as tk
+from openpyxl import Workbook,load_workbook
+import os
+
 measurement_entries=[]
+
 def add_fields():
     try:
         count = int(number.get())
         for i in range(count):
-            tk.Label(ts, text=f"Measurement {i+1}:").pack()
-            entry = tk.Entry(ts)
+            tk.Label(frame1, text=f"Measurement {i+1}:").pack()
+            entry = tk.Entry(frame1)
             entry.pack()
             measurement_entries.append(entry)
     except ValueError:
         print("Please enter a valid number")
+        
 def clear():
-    for widget in ts.winfo_children():
+    for widget in frame1.winfo_children():
         widget.destroy()
     measurement_entries.clear()
+
+def save_to_excel():
+    uid = ID.get()
+    mac = MAC.get()
+    measurements = [entry.get() for entry in measurement_entries]
+    file_path = "data.xlsx"
+    if os.path.exists(file_path):
+        wb = load_workbook(file_path)
+        ws = wb.active
+        if ws.max_row == 1 and ws.max_column == 1 and ws["A1"].value is None:
+            ws.append([ "Unique ID", "MAC"] + [f"Measurement {i+1}" for i in range(len(measurements))])
+    else:
+        wb = Workbook()
+        ws = wb.active
+        ws.append(["Unique ID", "MAC"] + [f"Measurement {i+1}" for i in range(len(measurements))])
+    ws.append([uid, mac] + measurements)
+    wb.save(file_path)
+    tk.Label(frame1, text="Saved to Excel ✅", fg="green").pack()
     
 root = tk.Tk()
 root.title("Test Logging")
@@ -29,7 +52,7 @@ tk.Label(root, text="Enter number of measurements").pack()
 number = tk.Entry(root)
 number.pack()
 tk.Button(root, text="Add Fields", command=add_fields).pack()
-ts=tk.Frame(root)
-ts.pack()
+frame1=tk.Frame(root)
+frame1.pack()
 tk.Button(root, text="Next entry", command=clear).pack()
 root.mainloop()
