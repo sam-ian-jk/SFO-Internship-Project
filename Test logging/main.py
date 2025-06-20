@@ -185,10 +185,10 @@ def save_to_excel():
         wb = Workbook()
         ws = wb.active
         ws.insert_rows(1)
-        ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=4)
+        ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=6)
         heading_cell = ws.cell(row=1, column=1)
-        heading_cell.value = f"Cold Test - {pno}"
-        heading_cell.font = Font(size=14, bold=True, color="1F4E78")
+        heading_cell.value = f"COLD TEST - {pno}"
+        heading_cell.font = Font(size=24, bold=True, color="1F4E78")
         heading_cell.alignment = Alignment(horizontal="center")
 
         headers = ["Sl No", "Supply/Component", "Probing Point", "Expected Impedance"]
@@ -196,7 +196,7 @@ def save_to_excel():
         header_fill = PatternFill(start_color="BDD7EE", end_color="BDD7EE", fill_type="solid")
         for cell in ws[2]:
             cell.fill = header_fill
-            cell.font = Font(bold=True)
+            cell.font = Font(size=12, bold=True)
             cell.alignment = Alignment(horizontal='center')
     else:
         wb = load_workbook(file_path)
@@ -207,7 +207,7 @@ def save_to_excel():
         if ws.cell(row=2, column=idx).value != header_text:
             ws.cell(row=2, column=idx).value = header_text
             ws.cell(row=2, column=idx).fill = PatternFill(start_color="BDD7EE", end_color="BDD7EE", fill_type="solid")
-            ws.cell(row=2, column=idx).font = Font(bold=True)
+            ws.cell(row=2, column=idx).font = Font(size=12,bold=True)
             ws.cell(row=2, column=idx).alignment = Alignment(horizontal='center')
 
     current_header = [cell.value for cell in ws[2]]
@@ -215,7 +215,7 @@ def save_to_excel():
         col = len(current_header) + 1
         ws.cell(row=2, column=col).value = sno
         ws.cell(row=2, column=col).fill = PatternFill(start_color="D9EAD3", end_color="D9EAD3", fill_type="solid")
-        ws.cell(row=2, column=col).font = Font(bold=True)
+        ws.cell(row=2, column=col).font = Font(size=12,bold=True)
         sn_col = col
     else:
         sn_col = current_header.index(sno) + 1
@@ -229,7 +229,13 @@ def save_to_excel():
 
     end_row = len(structured_data['entries']) + 3
     result = "PASS" if is_pass(measurements) else "FAIL"
-
+    for i in range(end_row):
+        i=i+3
+        for j in range(1,sn_col):
+            ws.cell(row=i,column=j).font=Font(size=12)
+            ws.cell(row=i,column=j).alignment=Alignment(horizontal='center')
+        i+1
+        
     ws.cell(row=end_row, column=sn_col - 1).value = "Result:"
     result_cell = ws.cell(row=end_row, column=sn_col)
     result_cell.value = result
