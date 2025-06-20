@@ -60,12 +60,16 @@ def clear_all():
     current_entry = 0
     expected_entries = 0
     status_label.config(text="All fields cleared 🧼")
-
-def clear_fields():
+def clear_basic():
     for key in ['PN', 'SN', 'NUM']:
         if key in entries:
             entries[key].delete(0, tk.END)
     status_label.config(text="Basic fields cleared 🧽")
+def clear_fields():
+    for key in ['SS', 'TP','MV']:
+        if key in entries:
+            entries[key].delete(0, tk.END)
+    status_label.config(text="info fields cleared 🧽")
 
 def start_entry():
     pno = entries['PN'].get()
@@ -109,25 +113,11 @@ def show_extra_fields():
     frame3.pack(side="left", pady=10)
 
     tk.Button(frame4, text=" Add Measurement", command=add_measurement,
-              font=('Arial', 13), bg='#28a745', fg='white', width=42).grid(row=0, column=0, columnspan=2, padx=10, pady=8)
+        font=('Arial', 13), bg='#28a745', fg='white', width=42).grid(row=0, column=0, columnspan=2, padx=10, pady=8)
 
     tk.Button(frame4, text="Create New File", command=clear_all,
-              font=('Arial', 13), bg='#dc3545', fg='white', width=42).grid(row=1, column=0, columnspan=2, pady=12)
+        font=('Arial', 13), bg='#dc3545', fg='white', width=42).grid(row=1, column=0, columnspan=2, pady=12)
     frame4.pack(side="right",pady=10)
-
-def parse_resistance(value):
-    match = re.match(r"([\d.]+)\s*([KkMmRr]?)", value)
-    if not match:
-        return 0
-    number, unit = match.groups()
-    number = float(number)
-    return number * {'K': 1e3, 'M': 1e6, 'R': 1, '': 1}.get(unit.upper(), 0)
-
-def is_pass(measurements):
-    for value in measurements:
-        if parse_resistance(value) <= 10:
-            return False
-    return True
 
 def add_measurement():
     global current_entry
@@ -160,6 +150,23 @@ def add_measurement():
         messagebox.showinfo("Done ✅", f"All {expected_entries} measurements recorded. Saving to Excel...")
         save_to_excel()
         status_label.config(text="Measurements saved successfully 💾")
+
+
+def parse_resistance(value):
+    match = re.match(r"([\d.]+)\s*([KkMmRr]?)", value)
+    if not match:
+        return 0
+    number, unit = match.groups()
+    number = float(number)
+    return number * {'K': 1e3, 'M': 1e6, 'R': 1, '': 1}.get(unit.upper(), 0)
+
+def is_pass(measurements):
+    expv=entries['EXP'].get()
+    c=int(expv)
+    for value in measurements:
+        if parse_resistance(value) <= c:
+            return False
+    return True
 
 def save_to_excel():
     pno = entries['PN'].get()
@@ -217,8 +224,8 @@ def save_to_excel():
         ws.cell(row=i+3, column=1).value = i + 1
         ws.cell(row=i+3, column=2).value = data['ss']
         ws.cell(row=i+3, column=3).value = data['tp']
-        ws.cell(row=i+3, column=4).value = data['exp']
-        ws.cell(row=i+3, column=sn_col).value = f">{data['mv']}"
+        ws.cell(row=i+3, column=4).value = f">{data['exp']}"
+        ws.cell(row=i+3, column=sn_col).value = data['mv']
 
     end_row = len(structured_data['entries']) + 3
     result = "PASS" if is_pass(measurements) else "FAIL"
@@ -295,7 +302,7 @@ def generate_report_txt():
 tk.Button(frame2, text=" Start Entry", command=start_entry,
     font=('Arial', 13), bg='#007acc', fg='white', width=20).grid(row=0, column=0, padx=12, pady=8)
 
-tk.Button(frame2, text="Clear Fields", command=clear_fields,
+tk.Button(frame2, text="Clear Fields", command=clear_basic(),
     font=('Arial', 13), bg='#17a2b8', fg='white', width=20).grid(row=0, column=1, padx=12, pady=8)
 tk.Button(frame2, text="Generate Report", command=generate_report_txt,
     font=('Arial', 13), bg='#6f42c1', fg='white', width=20).grid(row=0, column=2, padx=12, pady=8)
