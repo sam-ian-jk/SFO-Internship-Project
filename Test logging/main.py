@@ -268,18 +268,27 @@ def save_to_excel():
 
 def generate_report_txt():
     pno = entries['PN'].get()
+    sno = entries['SN'].get()
     if not pno:
         messagebox.showerror("Oops", "Please enter the Part Number first to generate a report.")
         return
 
-    file_path = f"{pno}.xlsx"
-    if not os.path.exists(file_path):
-        messagebox.showerror("File Not Found", f"No file found for Part Number: {pno}")
+    file_path = filedialog.askopenfilename(
+        title="Select the Excel file to generate report from",
+        filetypes=[("Excel Files", "*.xlsx")],
+        initialfile=f"{pno}.xlsx"
+    )
+
+    if not file_path:
+        messagebox.showinfo("Cancelled", "No file selected.")
         return
 
-    wb = load_workbook(file_path)
-    ws = wb.active
-
+    try:
+        wb = load_workbook(file_path)
+        ws = wb.active
+    except Exception as e:
+        messagebox.showerror("Error", f"Couldn't open the file:\n{str(e)}")
+        return
     sno = entries['SN'].get()
     result = tester = date = "N/A"
 
@@ -297,7 +306,7 @@ def generate_report_txt():
     report_lines = [
         "*********** Cold Test Report ***********",
         f"Part Number    : {pno}",
-        f"Serial Number  : {sno if sno else 'N/A'}",
+        f"Serial Number  : {sno}",
         f"Tested By      : {tester}",
         f"Date           : {date}",
         f"Final Result   : {result}",
@@ -306,18 +315,23 @@ def generate_report_txt():
 
     report_text = "\n".join(report_lines)
     report_filename = filedialog.asksaveasfilename(
-    defaultextension=".txt",
-    filetypes=[("Text files", "*.txt")],
-    initialfile=f"{pno}_Report.txt",
-    title="Save Report As"
+        defaultextension=".txt",
+        filetypes=[("Text files", "*.txt")],
+        initialfile=f"{pno}_Report.txt",
+        title="Save Report As"
     )
+
     if not report_filename:
         messagebox.showinfo("Cancelled", "Report generation cancelled.")
         return
-    with open(report_filename, "w") as f:
-        f.write(report_text)
 
-    messagebox.showinfo("Report Generated ✅", f"Text report saved as:\n{report_filename}")
+    try:
+        with open(report_filename, "w") as f:
+            f.write(report_text)
+        messagebox.showinfo("Report Generated ✅", f"Text report saved as:\n{report_filename}")
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to save the report:\n{str(e)}")
+
 
 tk.Button(frame2, text=" Start Entry", command=start_entry,
     font=('Arial', 13), bg='#007acc', fg='white', width=20).grid(row=0, column=0, padx=12, pady=8)
