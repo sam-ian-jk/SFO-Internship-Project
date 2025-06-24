@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, filedialog
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.utils import get_column_letter
@@ -11,7 +11,6 @@ measurements = []
 expected_entries = 0
 current_entry = 0
 structured_data = {}
-
 root = tk.Tk()
 root.title("Cold Test Logger 🧪")
 root.geometry("900x750")
@@ -45,9 +44,9 @@ def create_input_row(row, label_text, key, parent, placeholder=""):
     entry.grid(row=row, column=1, padx=12, pady=8)
     entries[key] = entry
 
-create_input_row(0, "Part Number", "PN", frame1, "e.g., 146-PCA000045-L")
-create_input_row(1, "Serial Number", "SN", frame1, "e.g., AT-5224-13-0003")
-create_input_row(2, "Number of Testing Points", "NUM", frame1, "e.g., 5")
+create_input_row(0, "Part Number", "PN", frame1)
+create_input_row(1, "Serial Number", "SN", frame1)
+create_input_row(2, "Number of Testing Points", "NUM", frame1)
 
 entries['PN'].focus()
 
@@ -147,7 +146,7 @@ def add_measurement():
         clear_fields()
         status_label.config(text=f"Added {current_entry}/{expected_entries}")
     else:
-        messagebox.showinfo("Done ✅", f"All {expected_entries} measurements recorded. Saving to Excel...")
+        messagebox.showinfo("Done ✅", f"All {expected_entries} measurements recorded.")
         save_to_excel()
         status_label.config(text="Measurements saved successfully 💾")
 
@@ -177,8 +176,16 @@ def save_to_excel():
     if not tester:
         messagebox.showerror("Missing Info", "Please enter the tester's name.")
         return
+    file_path = filedialog.asksaveasfilename(
+    defaultextension=".xlsx",
+    filetypes=[("Excel files", "*.xlsx")],
+    initialfile=f"{pno}.xlsx",
+    title="Save Excel File"
+    )
+    if not file_path:
+        messagebox.showinfo("Cancelled", "Save operation cancelled.")
+        return
 
-    file_path = f"{pno}.xlsx"
     new_file = not os.path.exists(file_path)
 
     if new_file:
@@ -298,8 +305,15 @@ def generate_report_txt():
     ]
 
     report_text = "\n".join(report_lines)
-    report_filename = f"{pno}_Report.txt"
-
+    report_filename = filedialog.asksaveasfilename(
+    defaultextension=".txt",
+    filetypes=[("Text files", "*.txt")],
+    initialfile=f"{pno}_Report.txt",
+    title="Save Report As"
+    )
+    if not report_filename:
+        messagebox.showinfo("Cancelled", "Report generation cancelled.")
+        return
     with open(report_filename, "w") as f:
         f.write(report_text)
 
@@ -308,7 +322,7 @@ def generate_report_txt():
 tk.Button(frame2, text=" Start Entry", command=start_entry,
     font=('Arial', 13), bg='#007acc', fg='white', width=20).grid(row=0, column=0, padx=12, pady=8)
 
-tk.Button(frame2, text="Clear Fields", command=clear_basic(),
+tk.Button(frame2, text="Clear Fields", command=clear_basic,
     font=('Arial', 13), bg='#17a2b8', fg='white', width=20).grid(row=0, column=1, padx=12, pady=8)
 tk.Button(frame2, text="Generate Report", command=generate_report_txt,
     font=('Arial', 13), bg='#6f42c1', fg='white', width=20).grid(row=0, column=2, padx=12, pady=8)
